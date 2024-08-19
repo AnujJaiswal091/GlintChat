@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
-import { doc, setDoc } from "firebase/firestore"; 
+import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore"; 
 import { db } from '../../lib/firebase';
+import upload from '../../lib/upload';
 
 
 const Login = () => {
@@ -21,36 +22,77 @@ const Login = () => {
         }
     };
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-    };
-
-    const handleRegister = async (e) => { //database request thats why async  function
-        e.preventDefault();
+        setLoading(true);
 
         const formData = new FormData(e.target);
+        const { email, password } = Object.fromEntries(formData); 
 
-        const { username, email, password } = Object.fromEntries(formData); 
+        try{
+            signInWithEmailAndPassword(auth, email, password);
+        } catch(err){
+            console.log(err);
+            toast.error(err.message);
+        } finally{
+            setLoading(false);
+        }
 
+    };
+
+    const [loading, setLoading] = useState(false);
+
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+    
         try {
+            const formData = new FormData(e.target);
+            const { username, email, password } = Object.fromEntries(formData); 
+    
+            // VALIDATE INPUTS
+            if (!username || !email || !password) {
+                toast.warn("Please enter inputs!");
+                return;
+            }
+            if (!avatar.file) {
+                toast.warn("Please upload an avatar!");
+                return;
+            }
+        
+            // VALIDATE UNIQUE USERNAME
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, where("username", "==", username));
+            const querySnapshot = await getDocs(q);
+    
+            if (!querySnapshot.empty) {
+                toast.warn("Username already taken");
+                return;
+            }
+    
+            // Register user and upload avatar
             const res = await createUserWithEmailAndPassword(auth, email, password);
-
+            const imgUrl = await upload(avatar.file);
+    
             await setDoc(doc(db, "users", res.user.uid), {
                 username,
                 email,
+                avatar: imgUrl,
                 id: res.user.uid,
                 blocked: []
-              });
-
+            });
+    
             await setDoc(doc(db, "userchats", res.user.uid), {
                 chats: [],
-              });
-              
-            toast.success("Account created! You can login now!")
-
+            });
+    
+            toast.success("Account created! You can login now!");
+    
         } catch (error) {
             console.log('Error registering user:', error);
             toast.error(error.message);
+        } finally {
+            setLoading(false);  // This will always be called, ensuring the loading state is reset
         }
     };
 
@@ -61,7 +103,7 @@ const Login = () => {
                 <form onSubmit={handleLogin} className='flex flex-col items-center justify-center gap-5 '>
                     <input className='p-5 border-none outline-none bg-[rgba(17,25,40,0.6)] text-white rounded-lg' type="text" placeholder='Email' name='email' />
                     <input className='p-5 border-none outline-none bg-[rgba(17,25,40,0.6)] text-white rounded-lg' type="password" placeholder='Password' name='password' />
-                    <button className='w-[100%] p-5 border-none bg-blue-700 text-white rounded-lg cursor-pointer font-semibold ' type="submit">Sign In</button>
+                    <button disabled={loading} className='w-[100%] disabled:cursor-not-allowed disabled:bg-blue-900 p-5 border-none bg-blue-700 text-white rounded-lg cursor-pointer font-semibold ' type="submit">{loading ? "loading" : "Sign In"}</button>
                 </form>
             </div>
 
@@ -86,7 +128,7 @@ const Login = () => {
                     <input className='p-5 border-none outline-none bg-[rgba(17,25,40,0.6)] text-white rounded-lg' type="text" placeholder='Username' name='username' />
                     <input className='p-5 border-none outline-none bg-[rgba(17,25,40,0.6)] text-white rounded-lg' type="text" placeholder='Email' name='email' />
                     <input className='p-5 border-none outline-none bg-[rgba(17,25,40,0.6)] text-white rounded-lg' type="password" placeholder='Password' name='password' />
-                    <button className='w-[100%] p-5 border-none bg-blue-700 text-white rounded-lg cursor-pointer font-semibold ' type="submit">Sign Up</button>
+                    <button disabled={loading} className='w-[100%] disabled:cursor-not-allowed disabled:bg-blue-900 p-5 border-none bg-blue-700 text-white rounded-lg cursor-pointer font-semibold ' type="submit">{loading ? "loading" : "Sign Up"}</button>
                 </form>
             </div>
         </div>

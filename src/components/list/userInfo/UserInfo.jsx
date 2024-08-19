@@ -1,12 +1,14 @@
 import React from 'react'
+import { useUserStore   } from '../../../lib/userStore';
 
 const UserInfo = () => {
+  const { currentUser} = useUserStore();
   return (
     <div className='p-5 flex items-center justify-between'> {/*UserInfo */}
 
       <div className='gap-5 flex items-center'> {/*User */}
-        <img className='h-12 w-12 rounded-full object-cover' src="./avatar.png" alt="" />
-        <h2>John Doe</h2>
+        <img className='h-12 w-12 rounded-full object-cover' src={currentUser.avatar || "./avatar.png"} alt="" />
+        <h2>{currentUser.username}</h2>
       </div>
 
       <div className='flex gap-5 cursor-pointer' > {/*Icons */}

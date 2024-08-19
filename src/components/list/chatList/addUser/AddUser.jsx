@@ -1,21 +1,101 @@
-import React from 'react'
+import React, { useState } from 'react';
+import { db } from '../../../../lib/firebase';
+import { collection, getDocs, query, where, doc, updateDoc, arrayUnion, setDoc, serverTimestamp } from "firebase/firestore";
+import { useUserStore } from '../../../../lib/userStore';
 
 const AddUser = () => {
+  const [user, setUser] = useState(null);
+
+  const { currentUser } = useUserStore();
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const username = formData.get("username");
+
+    try {
+      const userRef = collection(db, "users");
+
+      const q = query(userRef, where("username", "==", username));
+
+      const querySnapShot = await getDocs(q);
+
+      if (!querySnapShot.empty) {
+        setUser(querySnapShot.docs[0].data());
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleAdd = async () => {
+    const chatRef = collection(db, "chats")
+    const userChatsRef = collection(db, "userchats")
+
+    try{
+      const newChatRef = doc(chatRef)
+
+      await setDoc(newChatRef, {
+        createdAt: serverTimestamp(),
+        messages: [],
+      });
+
+      await updateDoc(doc(userChatsRef, user.id),{
+        chats:arrayUnion({
+          chatID: newChatRef.id,
+          lastMessage: "",
+          recieverId: currentUser.id,
+          updatedAt: Date.now(),
+        }),
+      });
+
+      await updateDoc(doc(userChatsRef, currentUser.id),{
+        chats:arrayUnion({
+          chatId: newChatRef.id,
+          lastMessage: "",
+          receiverId: user.id,
+          updatedAt: Date.now(),
+        }),
+      });
+
+      console.log(newChatRef.id)
+    } catch (err) {
+      console.log(err)
+    }
+  };
+
   return (
-    <div className='w-max h-max p-7 bg-[rgba(17,25,40,0.72)] rounded-xl absolute top-0 bottom-0 left-0 right-0 m-auto'> {/*AddUser */}
-        <form className='flex gap-5'> 
-            <input className='p-5 rounded-lg border-none outline-none' type="text" placeholder='Username' name='username' />
-            <button className='p-5 rounded-lg bg-blue-700 text-white border-none cursor-pointer'>Search</button>
-        </form>
-        <div className='mt-12 flex items-center justify-between'>{/*User */}
-            <div className='flex items-center gap-5'> {/**Detail */}
-                <img  className='h-12 w-12 object-cover rounded-full' src="./avatar.png" alt="" />
-                <span>Jane Doe</span>
-            </div>
-            <button className='p-2 rounded-lg bg-blue-700 text-white border-none cursor-pointer'>Add User</button>
-        </div> 
+    <div className='w-max h-max p-7 bg-[rgba(17,25,40,0.72)] rounded-xl absolute top-0 bottom-0 left-0 right-0 m-auto'>
+      <form onSubmit={handleSearch} className='flex gap-5'>
+        <input
+          className='p-5 rounded-lg border-none outline-none text-black'
+          type="text"
+          placeholder='Username'
+          name = "username"
+        />
+        <button className='p-5 rounded-lg bg-blue-700 text-white border-none cursor-pointer'>Search</button>
+      </form>
+
+      {user && (
+        <div className='mt-12 flex items-center justify-between'>
+          <div className='flex items-center gap-5'>
+            <img
+              className='h-12 w-12 object-cover rounded-full'
+              src={user.avatar || "./avatar.png"}
+              alt=""
+            />
+            <span>{user.username}</span>
+          </div>
+          <button 
+            className='p-2 rounded-lg bg-blue-700 text-white border-none cursor-pointer'
+            onClick={handleAdd}
+          >
+            Add User
+          </button>
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
-export default AddUser
+export default AddUser;
