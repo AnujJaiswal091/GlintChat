@@ -1,7 +1,18 @@
-import React, { useState } from 'react';
-import { db } from '../../../../lib/firebase';
-import { collection, getDocs, query, where, doc, updateDoc, arrayUnion, setDoc, serverTimestamp } from "firebase/firestore";
-import { useUserStore } from '../../../../lib/userStore';
+import { db } from "../../../../lib/firebase";
+import {
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import { useState } from "react";
+import { useUserStore } from "../../../../lib/userStore";
 
 const AddUser = () => {
   const [user, setUser] = useState(null);
@@ -29,38 +40,36 @@ const AddUser = () => {
   };
 
   const handleAdd = async () => {
-    const chatRef = collection(db, "chats")
-    const userChatsRef = collection(db, "userchats")
+    const chatRef = collection(db, "chats");
+    const userChatsRef = collection(db, "userchats");
 
-    try{
-      const newChatRef = doc(chatRef)
+    try {
+      const newChatRef = doc(chatRef);
 
       await setDoc(newChatRef, {
         createdAt: serverTimestamp(),
         messages: [],
       });
 
-      await updateDoc(doc(userChatsRef, user.id),{
-        chats:arrayUnion({
-          chatID: newChatRef.id,
+      await updateDoc(doc(userChatsRef, user.id), {
+        chats: arrayUnion({
+          chatId: newChatRef.id,
           lastMessage: "",
-          recieverId: currentUser.id,
+          receiverId: currentUser.id,
           updatedAt: Date.now(),
         }),
       });
 
-      await updateDoc(doc(userChatsRef, currentUser.id),{
-        chats:arrayUnion({
+      await updateDoc(doc(userChatsRef, currentUser.id), {
+        chats: arrayUnion({
           chatId: newChatRef.id,
           lastMessage: "",
           receiverId: user.id,
           updatedAt: Date.now(),
         }),
       });
-
-      console.log(newChatRef.id)
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
   };
 
