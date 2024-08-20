@@ -8,6 +8,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./lib/firebase";
 import { useUserStore } from "./lib/userStore";
 import { useChatStore } from "./lib/chatStore";
+import { ThreeDots } from "react-loader-spinner";
 
 const App = () => {
 
@@ -32,10 +33,20 @@ const App = () => {
   return (
     <div className="bg-hero-pattern bg-cover h-screen flex items-center justify-center">
       {/* BODY */}
-      <div className="flex h-screen w-screen bg-[rgba(17,25,40,0.75)] backdrop-blur-[19px] backdrop-saturate-[180%] text-white rounded-lg shadow-black shadow-2xl">
+      <div className="flex h-screen w-screen bg-[rgba(17,25,40,0.75)] backdrop-blur-[5px] backdrop-saturate-[180%] text-white rounded-lg shadow-black shadow-2xl">
         {/* CONTAINER */}
         {isLoading ? (
-          <div className="flex w-[100%] justify-center items-center "><h1 className="p-12 text-4xl rounded-lg bg-[rgba(17,25,40,0.9)]">Loading...</h1></div>
+          <div className="flex w-[100%] justify-center items-center "><h1 className="p-8 rounded-lg bg-[rgba(17,25,40,0.9)]">
+            <ThreeDots
+            visible={true}
+            height="120"
+            width="120"
+            color="#3b82f6"
+            radius="9"
+            ariaLabel="three-dots-loading"
+            />
+
+          </h1></div>
         ) : currentUser ? (
           <div className="flex flex-grow">
             <List />
