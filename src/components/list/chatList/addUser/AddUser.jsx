@@ -13,6 +13,8 @@ import {
 } from "firebase/firestore";
 import { useState } from "react";
 import { useUserStore } from "../../../../lib/userStore";
+import { toast } from "react-toastify";
+
 
 const AddUser = () => {
   const [user, setUser] = useState(null);
@@ -44,13 +46,32 @@ const AddUser = () => {
     const userChatsRef = collection(db, "userchats");
 
     try {
-      const newChatRef = doc(chatRef);
+      // Fetch current user's chats to check if the chat already exists
+      const currentUserChatsDoc = await getDoc(
+        doc(userChatsRef, currentUser.id)
+      );
+      const currentUserChats = currentUserChatsDoc.exists()
+        ? currentUserChatsDoc.data().chats
+        : [];
 
+      // Check if the chat already exists with the selected user
+      const isChatExisting = currentUserChats.some(
+        (chat) => chat.receiverId === user.id
+      );
+
+      if (isChatExisting) {
+        toast.error("User is already added to your chats.");
+        return;
+      }
+
+      // Create a new chat document if the chat does not exist
+      const newChatRef = doc(chatRef);
       await setDoc(newChatRef, {
         createdAt: serverTimestamp(),
         messages: [],
       });
 
+      // Update both users' chat lists
       await updateDoc(doc(userChatsRef, user.id), {
         chats: arrayUnion({
           chatId: newChatRef.id,
@@ -68,35 +89,40 @@ const AddUser = () => {
           updatedAt: Date.now(),
         }),
       });
+
+      toast.success("User added to your chats!");
     } catch (err) {
       console.log(err);
+      toast.error("Failed to add user. Please try again.");
     }
   };
 
   return (
-    <div className='w-max h-max p-7 bg-[rgba(17,25,40,0.72)] rounded-xl absolute top-0 bottom-0 left-0 right-0 m-auto'>
-      <form onSubmit={handleSearch} className='flex gap-5'>
+    <div className="w-max h-max p-7 bg-[rgba(17,25,40,0.72)] rounded-xl absolute top-0 bottom-0 left-0 right-0 m-auto">
+      <form onSubmit={handleSearch} className="flex gap-5">
         <input
-          className='p-5 rounded-lg border-none outline-none text-black'
+          className="p-5 rounded-lg border-none outline-none text-black"
           type="text"
-          placeholder='Username'
-          name = "username"
+          placeholder="Username"
+          name="username"
         />
-        <button className='p-5 rounded-lg bg-blue-700 text-white border-none cursor-pointer'>Search</button>
+        <button className="p-5 rounded-lg bg-blue-700 text-white border-none cursor-pointer">
+          Search
+        </button>
       </form>
 
       {user && (
-        <div className='mt-12 flex items-center justify-between'>
-          <div className='flex items-center gap-5'>
+        <div className="mt-12 flex items-center justify-between">
+          <div className="flex items-center gap-5">
             <img
-              className='h-12 w-12 object-cover rounded-full'
+              className="h-12 w-12 object-cover rounded-full"
               src={user.avatar || "./avatar.png"}
               alt=""
             />
             <span>{user.username}</span>
           </div>
-          <button 
-            className='p-2 rounded-lg bg-blue-700 text-white border-none cursor-pointer'
+          <button
+            className="p-2 rounded-lg bg-blue-700 text-white border-none cursor-pointer"
             onClick={handleAdd}
           >
             Add User
@@ -105,6 +131,6 @@ const AddUser = () => {
       )}
     </div>
   );
-}
+};
 
 export default AddUser;
