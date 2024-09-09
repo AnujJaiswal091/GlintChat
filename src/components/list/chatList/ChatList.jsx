@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import AddUser from "./addUser/addUser";
-import { useUserStore } from "../../../lib/userStore";
+import AddUser from "./addUser/AddUser.jsx";
+import { useUserStore } from "../../../lib/userStore.js";
 import { doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
-import { db } from "../../../lib/firebase";
-import { useChatStore } from "../../../lib/chatStore";
+import { db } from "../../../lib/firebase.js";
+import { useChatStore } from "../../../lib/chatStore.js";
 
 const ChatList = () => {
   const [chats, setChats] = useState([]);

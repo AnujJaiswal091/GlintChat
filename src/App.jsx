@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
-import Detail from "./components/detail/Detail";
-import Chat from "./components/chat/Chat";
-import List from "./components/list/List";
-import Login from "./components/login/Login";
-import Notification from "./components/notification/Notification";
+import Detail from "./components/detail/Detail.jsx";
+import Chat from "./components/chat/Chat.jsx";
+import List from "./components/list/List.jsx";
+import Login from "./components/login/Login.jsx";
+import Notification from "./components/notification/Notification.jsx";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./lib/firebase";
-import { useUserStore } from "./lib/userStore";
-import { useChatStore } from "./lib/chatStore";
+import { auth } from "./lib/firebase.js";
+import { useUserStore } from "./lib/userStore.js";
+import { useChatStore } from "./lib/chatStore.js";
 import { ThreeDots } from "react-loader-spinner";
 
 const App = () => {

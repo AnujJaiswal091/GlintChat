@@ -1,10 +1,10 @@
 import React from 'react';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import { auth } from '../../lib/firebase';
-import { useChatStore } from '../../lib/chatStore';
-import { useUserStore } from '../../lib/userStore';
+import { useChatStore } from '../../lib/chatStore.js';
+import { useUserStore } from '../../lib/userStore.js';
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore'; 
-import { db } from '../../lib/firebase'; 
+import { db } from '../../lib/firebase.js'; 
 
 
 const Detail = () => {

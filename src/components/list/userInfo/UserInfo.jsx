@@ -1,5 +1,5 @@
 import React from 'react'
-import { useUserStore   } from '../../../lib/userStore';
+import { useUserStore   } from '../../../lib/userStore.js';
 
 const UserInfo = () => {
   const { currentUser} = useUserStore();

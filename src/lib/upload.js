@@ -1,5 +1,5 @@
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "./firebase";
+import { storage } from "./firebase.js";
 
 const upload = async (file) => {
 
