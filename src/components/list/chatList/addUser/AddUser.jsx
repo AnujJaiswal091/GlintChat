@@ -15,7 +15,6 @@ import { useState } from "react";
 import { useUserStore } from "../../../../lib/userStore";
 import { toast } from "react-toastify";
 
-
 const AddUser = () => {
   const [user, setUser] = useState(null);
 
