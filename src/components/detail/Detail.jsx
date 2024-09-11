@@ -7,7 +7,7 @@ import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 import { db } from "../../lib/firebase.js";
 
 const Detail = () => {
-  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, changeBlock } =
+  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, changeBlock, resetChat } =
     useChatStore();
   const { currentUser } = useUserStore();
 
@@ -25,6 +25,11 @@ const Detail = () => {
       console.log(err);
     }
   };
+
+  const handleLogOut = () => {
+    resetChat();
+    auth.signOut();
+  }
 
   return (
     <div className="flex-1">
@@ -131,7 +136,7 @@ const Detail = () => {
         </button>
         <button
           className="cursor-pointer py-2 px-5 bg-[rgba(23,37,84,0.5)] hover:bg-[rgba(29,78,216,0.7)] text-white border-none rounded-lg"
-          onClick={() => auth.signOut()}
+          onClick={() => handleLogOut()}
         >
           Log Out
         </button>
