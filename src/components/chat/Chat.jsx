@@ -60,7 +60,7 @@ const Chat = () => {
   const upload = async (file) => {
     const storage = getStorage();
     const storageRef = ref(storage, `chat_images/${chatId}/${file.name}`);
-    await uploadBytes(storageRef, file);
+    await uploadBytes(storageRef, file); // simple file upload without much control
     const downloadURL = await getDownloadURL(storageRef);
     return downloadURL;
   };
@@ -262,7 +262,7 @@ const Chat = () => {
 
         <button
           onClick={handleSend}
-          className="bg-blue-500 rounded-lg py-2 px-5 border-none disabled:cursor-not-allowed"
+          className="bg-blue-500 opacity-70 rounded-lg py-2 px-5 border-none disabled:cursor-not-allowed hover:bg-blue-700 active:opacity-100" 
           disabled={isCurrentUserBlocked || isReceiverBlocked}
         >
           Send

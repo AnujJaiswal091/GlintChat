@@ -64,15 +64,15 @@ const AddUser = () => {
       }
 
       // Create a new chat document if the chat does not exist
-      const newChatRef = doc(chatRef);
-      await setDoc(newChatRef, {
+      const newChatRef = doc(chatRef);  //creates a new document reference within the chats collection. Since no specific document ID is provided, Firestore generates a unique ID for this new document.
+      await setDoc(newChatRef, {  //This line creates a new document in the chats collection at the reference specified by newChatRef
         createdAt: serverTimestamp(),
         messages: [],
       });
 
       // Update both users' chat lists
       await updateDoc(doc(userChatsRef, user.id), {
-        chats: arrayUnion({
+        chats: arrayUnion({  // is used to add a new chat entry to the existing array of chats for the user, avoiding duplication of entries.
           chatId: newChatRef.id,
           lastMessage: "",
           receiverId: currentUser.id,
