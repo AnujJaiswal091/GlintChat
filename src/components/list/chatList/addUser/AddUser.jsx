@@ -20,6 +20,8 @@ const AddUser = () => {
 
   const { currentUser } = useUserStore();
 
+  const [loading, setLoading] = useState(false);
+
   const handleSearch = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -43,6 +45,7 @@ const AddUser = () => {
   const handleAdd = async () => {
     const chatRef = collection(db, "chats");
     const userChatsRef = collection(db, "userchats");
+    setLoading(true);
 
     try {
       // Fetch current user's chats to check if the chat already exists
@@ -64,15 +67,17 @@ const AddUser = () => {
       }
 
       // Create a new chat document if the chat does not exist
-      const newChatRef = doc(chatRef);  //creates a new document reference within the chats collection. Since no specific document ID is provided, Firestore generates a unique ID for this new document.
-      await setDoc(newChatRef, {  //This line creates a new document in the chats collection at the reference specified by newChatRef
+      const newChatRef = doc(chatRef); //creates a new document reference within the chats collection. Since no specific document ID is provided, Firestore generates a unique ID for this new document.
+      await setDoc(newChatRef, {
+        //This line creates a new document in the chats collection at the reference specified by newChatRef
         createdAt: serverTimestamp(),
         messages: [],
       });
 
       // Update both users' chat lists
       await updateDoc(doc(userChatsRef, user.id), {
-        chats: arrayUnion({  // is used to add a new chat entry to the existing array of chats for the user, avoiding duplication of entries.
+        chats: arrayUnion({
+          // is used to add a new chat entry to the existing array of chats for the user, avoiding duplication of entries.
           chatId: newChatRef.id,
           lastMessage: "",
           receiverId: currentUser.id,
@@ -93,6 +98,8 @@ const AddUser = () => {
     } catch (err) {
       console.log(err);
       toast.error("Failed to add user. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -121,8 +128,9 @@ const AddUser = () => {
             <span>{user.username}</span>
           </div>
           <button
-            className="p-2 rounded-lg bg-blue-700 text-white border-none cursor-pointer"
+            className="p-2 rounded-lg bg-blue-700 text-white border-none cursor-pointer disabled:cursor-not-allowed  disabled:bg-blue-900"
             onClick={handleAdd}
+            disabled={loading}
           >
             Add User
           </button>
